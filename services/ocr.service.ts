@@ -6,36 +6,49 @@ export async function convertImageToPdfWithText(
   imagePath: string,
   outputPdfPath: string
 ) {
-  const worker = await createWorker()
+  try {
+    // Create Tesseract.js worker
+    const worker = await createWorker()
 
-  await worker.setParameters({ tessedit_pageseg_mode: PSM.AUTO })
+    // Set Tesseract.js parameters
+    await worker.setParameters({ tessedit_pageseg_mode: PSM.AUTO })
 
-  const {
-    data: { text },
-  } = await worker.recognize(imagePath)
-  await worker.terminate()
+    // Recognize text from image
+    const {
+      data: { text },
+    } = await worker.recognize(imagePath)
+    await worker.terminate()
 
-  const pdfDoc = await PDFDocument.create()
-  const page = pdfDoc.addPage()
+    // Create PDF document
+    const pdfDoc = await PDFDocument.create()
+    const page = pdfDoc.addPage()
 
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
-  const fontSize = 12
-  const lines = text.split('\n')
-  let yOffset = page.getHeight() - fontSize
+    // Embed font and configure text properties
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
+    const fontSize = 12
+    const lineSpacing = 2
+    const textColor = rgb(0, 0, 0)
 
-  for (const line of lines) {
-    page.drawText(line, {
-      x: 50,
-      y: yOffset,
-      size: fontSize,
-      font,
-      color: rgb(0, 0, 0),
-    })
-    yOffset -= fontSize + 2
+    // Write text to PDF page
+    let yOffset = page.getHeight() - fontSize
+    const lines = text.split('\n')
+    for (const line of lines) {
+      page.drawText(line.trim(), {
+        x: 50,
+        y: yOffset,
+        size: fontSize,
+        font,
+        color: textColor,
+      })
+      yOffset -= fontSize + lineSpacing
+    }
+
+    // Save PDF to file
+    const pdfBytes = await pdfDoc.save()
+    fs.writeFileSync(outputPdfPath, pdfBytes)
+
+    console.log(`PDF created at ${outputPdfPath}`)
+  } catch (error) {
+    console.error('Error converting image to PDF:', error)
   }
-
-  const pdfBytes = await pdfDoc.save()
-  fs.writeFileSync(outputPdfPath, pdfBytes)
-
-  console.log(`PDF created at ${outputPdfPath}`)
 }
