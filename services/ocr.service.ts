@@ -1,6 +1,6 @@
 import { createWorker, PSM } from 'tesseract.js'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
-import fs from 'fs'
+import fs from 'fs/promises'
 
 export async function convertImageToPdfWithText(
   imagePath: string,
@@ -21,7 +21,7 @@ export async function convertImageToPdfWithText(
 
     // Create PDF document
     const pdfDoc = await PDFDocument.create()
-    const page = pdfDoc.addPage()
+    let page = pdfDoc.addPage()
 
     // Embed font and configure text properties
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
@@ -29,12 +29,18 @@ export async function convertImageToPdfWithText(
     const lineSpacing = 2
     const textColor = rgb(0, 0, 0)
 
-    // Write text to PDF page
-    let yOffset = page.getHeight() - fontSize
+    // Write text to PDF page with margins
+    const margin = 50
+    let yOffset = page.getHeight() - margin
     const lines = text.split('\n')
     for (const line of lines) {
+      if (yOffset < margin) {
+        // Add new page if the current page is full
+        page = pdfDoc.addPage()
+        yOffset = page.getHeight() - margin
+      }
       page.drawText(line.trim(), {
-        x: 50,
+        x: margin,
         y: yOffset,
         size: fontSize,
         font,
@@ -45,7 +51,7 @@ export async function convertImageToPdfWithText(
 
     // Save PDF to file
     const pdfBytes = await pdfDoc.save()
-    fs.writeFileSync(outputPdfPath, pdfBytes)
+    await fs.writeFile(outputPdfPath, pdfBytes)
 
     console.log(`PDF created at ${outputPdfPath}`)
   } catch (error) {

@@ -15,32 +15,52 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.convertImageToPdfWithText = void 0;
 const tesseract_js_1 = require("tesseract.js");
 const pdf_lib_1 = require("pdf-lib");
-const fs_1 = __importDefault(require("fs"));
+const promises_1 = __importDefault(require("fs/promises"));
 function convertImageToPdfWithText(imagePath, outputPdfPath) {
     return __awaiter(this, void 0, void 0, function* () {
-        const worker = yield (0, tesseract_js_1.createWorker)();
-        yield worker.setParameters({ tessedit_pageseg_mode: tesseract_js_1.PSM.AUTO });
-        const { data: { text }, } = yield worker.recognize(imagePath);
-        yield worker.terminate();
-        const pdfDoc = yield pdf_lib_1.PDFDocument.create();
-        const page = pdfDoc.addPage();
-        const font = yield pdfDoc.embedFont(pdf_lib_1.StandardFonts.Helvetica);
-        const fontSize = 12;
-        const lines = text.split('\n');
-        let yOffset = page.getHeight() - fontSize;
-        for (const line of lines) {
-            page.drawText(line, {
-                x: 50,
-                y: yOffset,
-                size: fontSize,
-                font,
-                color: (0, pdf_lib_1.rgb)(0, 0, 0),
-            });
-            yOffset -= fontSize + 2;
+        try {
+            // Create Tesseract.js worker
+            const worker = yield (0, tesseract_js_1.createWorker)();
+            // Set Tesseract.js parameters
+            yield worker.setParameters({ tessedit_pageseg_mode: tesseract_js_1.PSM.AUTO });
+            // Recognize text from image
+            const { data: { text }, } = yield worker.recognize(imagePath);
+            yield worker.terminate();
+            // Create PDF document
+            const pdfDoc = yield pdf_lib_1.PDFDocument.create();
+            let page = pdfDoc.addPage();
+            // Embed font and configure text properties
+            const font = yield pdfDoc.embedFont(pdf_lib_1.StandardFonts.Helvetica);
+            const fontSize = 12;
+            const lineSpacing = 2;
+            const textColor = (0, pdf_lib_1.rgb)(0, 0, 0);
+            // Write text to PDF page with margins
+            const margin = 50;
+            let yOffset = page.getHeight() - margin;
+            const lines = text.split('\n');
+            for (const line of lines) {
+                if (yOffset < margin) {
+                    // Add new page if the current page is full
+                    page = pdfDoc.addPage();
+                    yOffset = page.getHeight() - margin;
+                }
+                page.drawText(line.trim(), {
+                    x: margin,
+                    y: yOffset,
+                    size: fontSize,
+                    font,
+                    color: textColor,
+                });
+                yOffset -= fontSize + lineSpacing;
+            }
+            // Save PDF to file
+            const pdfBytes = yield pdfDoc.save();
+            yield promises_1.default.writeFile(outputPdfPath, pdfBytes);
+            console.log(`PDF created at ${outputPdfPath}`);
         }
-        const pdfBytes = yield pdfDoc.save();
-        fs_1.default.writeFileSync(outputPdfPath, pdfBytes);
-        console.log(`PDF created at ${outputPdfPath}`);
+        catch (error) {
+            console.error('Error converting image to PDF:', error);
+        }
     });
 }
 exports.convertImageToPdfWithText = convertImageToPdfWithText;
