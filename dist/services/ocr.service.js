@@ -20,19 +20,20 @@ function convertImageToPdfWithText(imagePath, outputPdfPath) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            // Create Tesseract.js worker
+            // Initialize Tesseract.js worker
             const worker = yield (0, tesseract_js_1.createWorker)();
             // Set Tesseract.js parameters
             yield worker.setParameters({ tessedit_pageseg_mode: tesseract_js_1.PSM.AUTO });
             // Recognize text from image
             const { data: { text, lines }, } = yield worker.recognize(imagePath);
             yield worker.terminate();
+            // Split recognized text into lines
             const lineTexts = text.split('\n');
-            // Create a new array to include empty strings in the correct index
+            // Combine recognized lines and empty strings from lineTexts
             const combinedLines = [];
             let textIndex = 0;
-            for (let i = 0; i < lineTexts.length; i++) {
-                if (lineTexts[i] === '') {
+            for (const lineText of lineTexts) {
+                if (lineText === '') {
                     combinedLines.push({ text: '', words: [{ font_size: 12 }] }); // Default font size for empty lines
                 }
                 else {
@@ -45,9 +46,9 @@ function convertImageToPdfWithText(imagePath, outputPdfPath) {
             let page = pdfDoc.addPage();
             // Embed font and configure text properties
             const font = yield pdfDoc.embedFont(pdf_lib_1.StandardFonts.Helvetica);
-            // Write text to PDF page with margins
             const margin = 50;
             let yOffset = page.getHeight() - margin;
+            // Write text to PDF page with margins
             for (const line of combinedLines) {
                 if (line.text === '') {
                     yOffset -= 12; // Space for empty lines, adjust as needed

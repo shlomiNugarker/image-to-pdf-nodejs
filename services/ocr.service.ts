@@ -7,7 +7,7 @@ export async function convertImageToPdfWithText(
   outputPdfPath: string
 ) {
   try {
-    // Create Tesseract.js worker
+    // Initialize Tesseract.js worker
     const worker = await createWorker()
 
     // Set Tesseract.js parameters
@@ -19,14 +19,15 @@ export async function convertImageToPdfWithText(
     } = await worker.recognize(imagePath)
     await worker.terminate()
 
+    // Split recognized text into lines
     const lineTexts = text.split('\n')
 
-    // Create a new array to include empty strings in the correct index
+    // Combine recognized lines and empty strings from lineTexts
     const combinedLines = []
     let textIndex = 0
 
-    for (let i = 0; i < lineTexts.length; i++) {
-      if (lineTexts[i] === '') {
+    for (const lineText of lineTexts) {
+      if (lineText === '') {
         combinedLines.push({ text: '', words: [{ font_size: 12 }] }) // Default font size for empty lines
       } else {
         combinedLines.push(lines[textIndex])
@@ -40,10 +41,10 @@ export async function convertImageToPdfWithText(
 
     // Embed font and configure text properties
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
-
-    // Write text to PDF page with margins
     const margin = 50
     let yOffset = page.getHeight() - margin
+
+    // Write text to PDF page with margins
     for (const line of combinedLines) {
       if (line.text === '') {
         yOffset -= 12 // Space for empty lines, adjust as needed
