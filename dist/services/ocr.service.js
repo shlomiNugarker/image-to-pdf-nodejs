@@ -24,7 +24,7 @@ function convertImageToPdfWithText(imagePath, outputPdfPath) {
             // Set Tesseract.js parameters
             yield worker.setParameters({ tessedit_pageseg_mode: tesseract_js_1.PSM.AUTO });
             // Recognize text from image
-            const { data: { text }, } = yield worker.recognize(imagePath);
+            const { data: { text, lines }, } = yield worker.recognize(imagePath);
             yield worker.terminate();
             // Create PDF document
             const pdfDoc = yield pdf_lib_1.PDFDocument.create();
@@ -37,14 +37,13 @@ function convertImageToPdfWithText(imagePath, outputPdfPath) {
             // Write text to PDF page with margins
             const margin = 50;
             let yOffset = page.getHeight() - margin;
-            const lines = text.split('\n');
             for (const line of lines) {
                 if (yOffset < margin) {
                     // Add new page if the current page is full
                     page = pdfDoc.addPage();
                     yOffset = page.getHeight() - margin;
                 }
-                page.drawText(line.trim(), {
+                page.drawText(line.text.trim(), {
                     x: margin,
                     y: yOffset,
                     size: fontSize,

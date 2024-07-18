@@ -15,7 +15,7 @@ export async function convertImageToPdfWithText(
 
     // Recognize text from image
     const {
-      data: { text },
+      data: { text, lines },
     } = await worker.recognize(imagePath)
     await worker.terminate()
 
@@ -32,14 +32,13 @@ export async function convertImageToPdfWithText(
     // Write text to PDF page with margins
     const margin = 50
     let yOffset = page.getHeight() - margin
-    const lines = text.split('\n')
     for (const line of lines) {
       if (yOffset < margin) {
         // Add new page if the current page is full
         page = pdfDoc.addPage()
         yOffset = page.getHeight() - margin
       }
-      page.drawText(line.trim(), {
+      page.drawText(line.text.trim(), {
         x: margin,
         y: yOffset,
         size: fontSize,
