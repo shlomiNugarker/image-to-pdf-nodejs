@@ -27,7 +27,7 @@ export async function convertImageToPdfWithText(
 
     for (let i = 0; i < lineTexts.length; i++) {
       if (lineTexts[i] === '') {
-        combinedLines.push({ text: '', words: [{ font_size: 12 }] }) // Default font size
+        combinedLines.push({ text: '', words: [{ font_size: 12 }] }) // Default font size for empty lines
       } else {
         combinedLines.push(lines[textIndex])
         textIndex++
@@ -46,7 +46,7 @@ export async function convertImageToPdfWithText(
     let yOffset = page.getHeight() - margin
     for (const line of combinedLines) {
       if (line.text === '') {
-        yOffset -= 10 // Space for empty lines, adjust as needed
+        yOffset -= 12 // Space for empty lines, adjust as needed
         continue
       }
 

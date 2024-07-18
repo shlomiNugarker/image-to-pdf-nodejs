@@ -33,7 +33,7 @@ function convertImageToPdfWithText(imagePath, outputPdfPath) {
             let textIndex = 0;
             for (let i = 0; i < lineTexts.length; i++) {
                 if (lineTexts[i] === '') {
-                    combinedLines.push({ text: '', words: [{ font_size: 12 }] }); // Default font size
+                    combinedLines.push({ text: '', words: [{ font_size: 12 }] }); // Default font size for empty lines
                 }
                 else {
                     combinedLines.push(lines[textIndex]);
@@ -50,7 +50,7 @@ function convertImageToPdfWithText(imagePath, outputPdfPath) {
             let yOffset = page.getHeight() - margin;
             for (const line of combinedLines) {
                 if (line.text === '') {
-                    yOffset -= 10; // Space for empty lines, adjust as needed
+                    yOffset -= 12; // Space for empty lines, adjust as needed
                     continue;
                 }
                 const fontSize = ((_a = line.words[0]) === null || _a === void 0 ? void 0 : _a.font_size) / 1.7 || 12; // Default font size if font_size is undefined
