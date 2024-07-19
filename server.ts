@@ -1,7 +1,6 @@
 import express, { Express } from 'express'
 import { json } from 'body-parser'
 import expressSession from 'express-session'
-import path from 'path'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import ocrRoutes from './api/ocr/ocr.routes'
