@@ -1,6 +1,7 @@
 import { createWorker, PSM } from 'tesseract.js'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import fs from 'fs/promises'
+import path from 'path'
 
 export async function convertImageToPdfWithText(
   imagePath: string,
@@ -78,5 +79,31 @@ export async function convertImageToPdfWithText(
     console.log(`PDF created at ${outputPdfPath}`)
   } catch (error) {
     console.error('Error converting image to PDF:', error)
+  }
+}
+
+export async function convertImagesInDirectory(directoryPath: string) {
+  try {
+    // Read all files in the directory
+    const files = await fs.readdir(directoryPath)
+
+    // Iterate through each file and convert it to PDF
+    for (const file of files) {
+      if (
+        file.endsWith('.png') ||
+        file.endsWith('.jpg') ||
+        file.endsWith('.jpeg')
+      ) {
+        const imagePath = path.join(directoryPath, file)
+        const outputPdfPath = path.join(directoryPath, `${file}.pdf`)
+
+        // Convert image to PDF
+        await convertImageToPdfWithText(imagePath, outputPdfPath)
+      }
+    }
+
+    console.log('All images converted to PDF successfully!')
+  } catch (error) {
+    console.error('Error converting images to PDF:', error)
   }
 }

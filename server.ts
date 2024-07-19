@@ -4,7 +4,11 @@ import expressSession from 'express-session'
 import path from 'path'
 import dotenv from 'dotenv'
 import cors from 'cors'
-import { convertImageToPdfWithText } from './services/ocr.service'
+import ocrRoutes from './api/ocr/ocr.routes'
+// import {
+//   convertImagesInDirectory,
+//   convertImageToPdfWithText,
+// } from './services/ocr.service'
 
 dotenv.config()
 
@@ -32,16 +36,22 @@ if (process.env.NODE_ENV === 'production') {
   app.use(cors(corsOptions))
 }
 
+app.use('/api/ocr', ocrRoutes)
+
 app.get('/**', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
 })
-
-const imagePath = path.resolve(__dirname, 'images', 'IMG_0047.PNG')
-const outputPdfPath = path.resolve(__dirname, 'pdfs', 'output.pdf')
-
-convertImageToPdfWithText(imagePath, outputPdfPath)
 
 const PORT = process.env.PORT || 3030
 http.listen(PORT, () => {
   console.log(`⚡️Server is running on port: ${PORT}`)
 })
+
+// // Uncomment these lines to use the conversion functions directly
+// const imagePath = path.resolve(__dirname, 'images', 'IMG_0047.PNG')
+// const outputPdfPath = path.resolve(__dirname, 'pdfs', 'output.pdf')
+
+// convertImageToPdfWithText(imagePath, outputPdfPath)
+
+// const imagesDirectory = path.resolve(__dirname, 'images')
+// convertImagesInDirectory(imagesDirectory)
