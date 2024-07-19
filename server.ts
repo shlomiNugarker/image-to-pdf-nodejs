@@ -26,17 +26,19 @@ app.use(session)
 app.use(json())
 app.use(express.static('public'))
 
-const corsOptions = {
-  origin: [
-    'http://127.0.0.1:3000',
-    'http://localhost:3000',
-    'https://image-to-pdf-free.vercel.app/',
-  ],
-  methods: ['POST'], // Specify allowed methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
-  credentials: true,
-}
-app.use(cors(corsOptions))
+// const corsOptions = {
+//   origin: [
+//     'http://127.0.0.1:3000',
+//     'http://localhost:3000',
+//     'https://image-to-pdf-free.vercel.app/',
+//   ],
+//   methods: ['POST'], // Specify allowed methods
+//   allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+//   credentials: true,
+// }
+// app.use(cors(corsOptions))
+
+app.use(cors()) // This will allow all origins. You can configure it to allow specific origins if needed.
 
 app.use('/api/ocr', ocrRoutes)
 
