@@ -32,6 +32,8 @@ const corsOptions = {
     'http://localhost:3000',
     'https://image-to-pdf-free.vercel.app/',
   ],
+  methods: ['POST'], // Specify allowed methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
   credentials: true,
 }
 app.use(cors(corsOptions))
